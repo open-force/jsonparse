@@ -131,7 +131,7 @@ Don't be misled by these examples that all start from `root`. You can just as ea
 root.get('menu.popup').get('menuitem').get('[2].onclick').getStringValue();
 ```
 
-### What can I pass to get()? ###
+## What can I pass to get()? ##
 
 The syntax for what you pass to the `get()` method is simple. You are passing a series of tokens separated by periods. A token is either:
 
@@ -156,7 +156,7 @@ root.get('menu.popup.menuitem[0]');
 root.get('menu.popup.menuitem.[0]');
 ```
 
-### Working with Collections ###
+## Working with Collections ##
 
 If you'd like to work with your collection nodes (object = Map, array = List), there are two methods on JSONParse:
 
