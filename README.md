@@ -132,6 +132,9 @@ root.get('menu.popup').get('menuitem').get('[2].onclick').getStringValue();
 ```
 
 ## What can I pass to get()? ##
+```
+public JSONParse get(String path) {}
+```
 
 The syntax for what you pass to the `get()` method is simple. You are passing a series of tokens separated by periods. A token is either:
 
