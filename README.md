@@ -72,7 +72,6 @@ For additional clarity:
 ```apex
 System.debug(root.toStringPretty());
 ```
-
 ```json
 {
   "menu" : {
@@ -97,7 +96,6 @@ System.debug(root.toStringPretty());
 ```apex
 System.debug(root.get('menu.popup').toStringPretty());
 ```
-
 ```json
 {
   "menuitem" : [ {
@@ -116,7 +114,6 @@ System.debug(root.get('menu.popup').toStringPretty());
 ```apex
 System.debug(root.get('menu.popup.menuitem').toStringPretty());
 ```
-
 ```json
 [ {
   "onclick" : "CreateNewDoc()",
@@ -133,7 +130,6 @@ System.debug(root.get('menu.popup.menuitem').toStringPretty());
 ```apex
 System.debug(root.get('menu.popup.menuitem.[0]').toStringPretty());
 ```
-
 ```json
 {
   "onclick" : "CreateNewDoc()",
@@ -220,6 +216,7 @@ public Boolean isArray() {}
 
 These two methods peek under the covers at the wrapped data and give you some information about what's inside. Here's an arbitrary example, where I use recursion to perform a dynamic inspection of the entire JSON tree. Obviously this contrived but it should give you an idea of what's possible!
 
+**Anonymous Apex Snippet**
 ```apex
 public void explore(JSONParse node, Integer depth) {
 	if(!(node.isObject() || node.isArray())) {
@@ -242,8 +239,7 @@ JSONParse root = new JSONParse('{"menu":{"id":"file","value":"File","popup":{"me
 explore(root, 0);
 ```
 
-Result:
-
+**Result**
 ```
 13:37:23.34 (39921697)|USER_DEBUG|[3]|DEBUG|**file
 13:37:23.34 (40158891)|USER_DEBUG|[3]|DEBUG|**File
