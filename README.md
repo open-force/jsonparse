@@ -48,7 +48,9 @@ Let's start with a simple example. Say we have the following JSON structure:
 
 We always start by instantiating JSONParse with a String value that holds some JSON:
 
-`JSONParse root = new JSONParse(someJSONData);`
+```
+JSONParse root = new JSONParse(someJSONData);
+```
 
 If we wanted to get to the `value` property inside `menu`, we would do this:
 
