@@ -48,7 +48,7 @@ Let's start with a simple example. Say we have the following JSON structure:
 
 We always start by instantiating JSONParse with a String value that holds some JSON:
 
-```
+```apex
 JSONParse root = new JSONParse(someJSONData);
 ```
 
