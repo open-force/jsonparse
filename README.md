@@ -3,7 +3,7 @@ Salesforce Apex JSON parser to make it easier to extract information from nested
 
 If you're sick of writing code like this:
 
-```
+```apex
 Map<String, Object> root = (Map<String, Object>)JSON.deserializeUntyped(someJSON);
 Map<String, Object> menu = (Map<String, Object>)root.get('menu');
 Map<String, Object> popup = (Map<String, Object>)menu.get('popup');
@@ -14,7 +14,7 @@ String thingIActuallyWanted = String.valueOf(secondItem.get('name'));
 
 ...then this parser is for you! Voila!
 
-```
+```apex
 new JSONParse(someJSON).get('menu.popup.menuitem.[1].name').getStringValue();
 ```
 
@@ -32,7 +32,7 @@ A little fuzzy? That's OK, let's look at some examples.
 
 Let's start with a simple example. Say we have the following JSON structure:
 
-```
+```json
 {"menu": {
   "id": "file",
   "value": "File",
@@ -52,22 +52,26 @@ We always start by instantiating JSONParse with a String value that holds some J
 
 If we wanted to get to the `value` property inside `menu`, we would do this:
 
-```
+```apex
 root.get('menu.value').getStringValue(); // "File"
 ```
 
 But what is actually happening here? Let's be a little more verbose:
 
-```
+```apex
 JSONParse childNode = root.get('menu.value');
 childNode.getStringValue(); // "File"
 ```
+
 The `get()` method is our key workhorse method in JSONParse. It allows us to drill into the tree structure and always returns an instance of JSONParse.
 
 For additional clarity:
-```
-System.debug(root.toStringPretty());
 
+```apex
+System.debug(root.toStringPretty());
+```
+
+```json
 {
   "menu" : {
     "popup" : {
@@ -86,9 +90,13 @@ System.debug(root.toStringPretty());
     "id" : "file"
   }
 }
+```
 
+```apex
 System.debug(root.get('menu.popup').toStringPretty());
+```
 
+```json
 {
   "menuitem" : [ {
     "onclick" : "CreateNewDoc()",
@@ -101,9 +109,13 @@ System.debug(root.get('menu.popup').toStringPretty());
     "value" : "Close"
   } ]
 }
+```
 
+```apex
 System.debug(root.get('menu.popup.menuitem').toStringPretty());
+```
 
+```json
 [ {
   "onclick" : "CreateNewDoc()",
   "value" : "New"
@@ -114,9 +126,13 @@ System.debug(root.get('menu.popup.menuitem').toStringPretty());
   "onclick" : "CloseDoc()",
   "value" : "Close"
 } ]
+```
 
+```apex
 System.debug(root.get('menu.popup.menuitem.[0]').toStringPretty());
+```
 
+```json
 {
   "onclick" : "CreateNewDoc()",
   "value" : "New"
@@ -127,12 +143,12 @@ You can see as we drill deeper and deeper into the data structure, we get smalle
 
 Don't be misled by these examples that all start from `root`. You can just as easily drill partway down, do some stuff, then keep going. You can even do things like this:
 
-```
+```apex
 root.get('menu.popup').get('menuitem').get('[2].onclick').getStringValue();
 ```
 
 ## What can I pass to get()? ##
-```
+```apex
 public JSONParse get(String path) {}
 ```
 
@@ -151,7 +167,7 @@ You can mix and match these two token types to your heart's content. Just rememb
 
 Tokens are always separated by a period. Here's a common mistake (don't do this):
 
-```
+```apex
 // NOT VALID SYNTAX
 root.get('menu.popup.menuitem[0]');
 
@@ -163,21 +179,79 @@ root.get('menu.popup.menuitem.[0]');
 
 If you'd like to work with your collection nodes (object = Map, array = List), there are two methods on JSONParse:
 
-```
+```apex
 public Map<String, JSONParse> asMap() {}
 public List<JSONParse> asList() {}
 ```
 
 So, to build on our previous examples, you could do something like this:
 
-```
+```apex
 for(JSONParse node : root.get('menu.popup.menuitem').asList()) {
     System.debug('Onclick: ' + node.get('onclick').toStringValue());
     System.debug('Value: ' + node.get('value').toStringValue());
 }
 ```
 
+Or this:
+
+```apex
+Map<String, JSONParse> menuProperties = root.get('menu').asMap();
+System.debug(menuProperties.keySet()); // (id, value, popup)
+for(String key : menuProperties.keySet()) {
+  JSONParse node = children.get(key);
+}
+```
+
 You can of course nest and repeat these patterns, to drill into arbitrarily complex data structures.
+
+## Dynamic Inspection ##
+
+There's some discovery built into the parser so you can explore the JSON structure without knowing the shape in advance.
+
+To do so, simply combine the two collection methods you just saw with these utility methods:
+
+```apex
+public Boolean isObject() {}
+public Boolean isArray() {}
+```
+
+These two methods peek under the covers at the wrapped data and give you some information about what's inside. Here's an arbitrary example, where I use recursion to perform a dynamic inspection of the entire JSON tree. Obviously this contrived but it should give you an idea of what's possible!
+
+```apex
+public void explore(JSONParse node, Integer depth) {
+	if(!(node.isObject() || node.isArray())) {
+		System.debug( '*'.repeat(depth) + node.getValue());
+	}
+	if(node.isObject()) {
+		for(String key : node.asMap().keySet()) {
+			explore(node.get(key), depth + 1);
+		}
+	}
+	if(node.isArray()) {
+		for(JSONParse item : node.asList()) {
+			explore(item, depth + 1);
+		}
+	}
+}
+
+JSONParse root = new JSONParse('{"menu":{"id":"file","value":"File","popup":{"menuitem":[{"value":"New","onclick":"CreateNewDoc()"},{"value":"Open","onclick":"OpenDoc()"},{"value":"Close","onclick":"CloseDoc()"}]}}}');
+
+explore(root, 0);
+```
+
+Result:
+
+```
+13:37:23.34 (39921697)|USER_DEBUG|[3]|DEBUG|**file
+13:37:23.34 (40158891)|USER_DEBUG|[3]|DEBUG|**File
+13:37:23.34 (40964502)|USER_DEBUG|[3]|DEBUG|*****New
+13:37:23.34 (41091905)|USER_DEBUG|[3]|DEBUG|*****CreateNewDoc()
+13:37:23.34 (41310876)|USER_DEBUG|[3]|DEBUG|*****Open
+13:37:23.34 (41477025)|USER_DEBUG|[3]|DEBUG|*****OpenDoc()
+13:37:23.34 (41820815)|USER_DEBUG|[3]|DEBUG|*****Close
+13:37:23.34 (41952080)|USER_DEBUG|[3]|DEBUG|*****CloseDoc()
+```
 
 ## Primitive Value Extraction ##
 
