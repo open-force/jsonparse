@@ -186,8 +186,8 @@ So, to build on our previous examples, you could do something like this:
 
 ```apex
 for(JSONParse node : root.get('menu.popup.menuitem').asList()) {
+
     System.debug('Onclick: ' + node.get('onclick').toStringValue());
-    System.debug('Value: ' + node.get('value').toStringValue());
 }
 ```
 
@@ -195,9 +195,12 @@ Or this:
 
 ```apex
 Map<String, JSONParse> menuProperties = root.get('menu').asMap();
+
 System.debug(menuProperties.keySet()); // (id, value, popup)
+
 for(String key : menuProperties.keySet()) {
-  JSONParse node = children.get(key);
+
+  JSONParse node = menuProperties.get(key);
 }
 ```
 
@@ -214,24 +217,29 @@ public Boolean isObject() {}
 public Boolean isArray() {}
 ```
 
-These two methods peek under the covers at the wrapped data and give you some information about what's inside. Here's an arbitrary example, where I use recursion to perform a dynamic inspection of the entire JSON tree. Obviously this contrived but it should give you an idea of what's possible!
+These two methods peek under the covers at the wrapped data and give you some information about what's inside. Here's an arbitrary example, where I use recursion to perform a dynamic inspection of the entire JSON tree. Obviously this is contrived but it should give you an idea of what's possible!
+
+You can copy this entire snippet into Anonymous Apex and run it yourself.
 
 **Anonymous Apex Snippet**
 ```apex
 public void explore(JSONParse node, Integer depth) {
-	if(!(node.isObject() || node.isArray())) {
-		System.debug( '*'.repeat(depth) + node.getValue());
-	}
-	if(node.isObject()) {
-		for(String key : node.asMap().keySet()) {
-			explore(node.get(key), depth + 1);
-		}
-	}
-	if(node.isArray()) {
-		for(JSONParse item : node.asList()) {
-			explore(item, depth + 1);
-		}
-	}
+
+    if(!(node.isObject() || node.isArray())) {
+        System.debug( '*'.repeat(depth) + node.getValue());
+    }
+	
+    if(node.isObject()) {
+        for(String key : node.asMap().keySet()) {
+            explore(node.get(key), depth + 1);
+        }
+    }
+	
+    if(node.isArray()) {
+        for(JSONParse item : node.asList()) {
+            explore(item, depth + 1);
+        }
+    }
 }
 
 JSONParse root = new JSONParse('{"menu":{"id":"file","value":"File","popup":{"menuitem":[{"value":"New","onclick":"CreateNewDoc()"},{"value":"Open","onclick":"OpenDoc()"},{"value":"Close","onclick":"CloseDoc()"}]}}}');
