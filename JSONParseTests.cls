@@ -131,7 +131,8 @@ private class JSONParseTests {
 		try {
 			parser.get('[7]');
 			System.assert(false, 'We used an index outside the bounds of our array, should have seen an exception about that.');
-		}catch(ListException e) {
+		}
+		catch(ListException e) {
 			System.assertEquals('List index out of bounds: 7', e.getMessage());
 		}
 	}
@@ -143,7 +144,8 @@ private class JSONParseTests {
 		try {
 			parser.get('badKey');
 			System.assert(false, 'Our key was invalid, should have seen an exception about that.');
-		}catch(JSONParse.MissingKeyException e) {
+		}
+		catch(JSONParse.MissingKeyException e) {
 			System.assertEquals('No match found for <badKey>: {widget}', e.getMessage());
 		}
 	}
@@ -155,7 +157,8 @@ private class JSONParseTests {
 		try {
 			parser.asMap();
 			System.assert(false, 'Root node is not an object, should have seen an exception about that.');
-		}catch(JSONParse.NotAnObjectException e) {
+		}
+		catch(JSONParse.NotAnObjectException e) {
 			System.assert(e.getMessage().startsWith('The wrapped value is not a JSON object:'));
 		}
 	}
@@ -167,7 +170,8 @@ private class JSONParseTests {
 		try {
 			parser.get('menu.popup.menuitem.first');
 			System.assert(false, 'Node is not an object, should have seen an exception about that.');
-		}catch(JSONParse.NotAnObjectException e) {
+		}
+		catch(JSONParse.NotAnObjectException e) {
 			System.assert(e.getMessage().startsWith('The wrapped value is not a JSON object:'));
 		}
 	}
@@ -179,7 +183,8 @@ private class JSONParseTests {
 		try {
 			parser.asList();
 			System.assert(false, 'Root node is not an array, should have seen an exception about that.');
-		}catch(JSONParse.NotAnArrayException e) {
+		}
+		catch(JSONParse.NotAnArrayException e) {
 			System.assert(e.getMessage().startsWith('The wrapped value is not a JSON array:'));
 		}
 	}
@@ -191,9 +196,45 @@ private class JSONParseTests {
 		try {
 			parser.get('menu.popup.[0]');
 			System.assert(false, 'Node is not an array, should have seen an exception about that.');
-		}catch(JSONParse.NotAnArrayException e) {
+		}
+		catch(JSONParse.NotAnArrayException e) {
 			System.assert(e.getMessage().startsWith('The wrapped value is not a JSON array:'));
 		}
+	}
+
+	@IsTest static void testExistsGoodKey() {
+
+		JSONParse parser = new JSONParse(SAMPLE1);
+
+		System.assertEquals(true, parser.exists('menu.popup.menuitem.[1].onclick'));
+	}
+
+	@IsTest static void testExistsNoIntermediaryKey() {
+
+		JSONParse parser = new JSONParse(SAMPLE1);
+
+		System.assertEquals(false, parser.exists('menu.popup.menuitems.[1].onclick'));
+	}
+
+	@IsTest static void testExistsNoKey() {
+
+		JSONParse parser = new JSONParse(SAMPLE1);
+
+		System.assertEquals(false, parser.exists('menu.popup.menuitem.[1].onexplosion'));
+	}
+
+	@IsTest static void testExistsGoodIndex() {
+
+		JSONParse parser = new JSONParse(SAMPLE3);
+
+		System.assertEquals(true, parser.exists('[1]'));
+	}
+
+	@IsTest static void testExistsBadIndex() {
+
+		JSONParse parser = new JSONParse(SAMPLE3);
+
+		System.assertEquals(false, parser.exists('[7]'));
 	}
 
 	@IsTest static void testGetBlobValue() {
@@ -209,7 +250,8 @@ private class JSONParseTests {
 			parser = new JSONParse('42');
 			parser.getBlobValue();
 			System.assert(false, 'Node is not a valid Blob, should have seen an exception about that.');
-		}catch(JSONParse.InvalidConversionException e) {
+		}
+		catch(JSONParse.InvalidConversionException e) {
 			System.assertEquals('Only String values can be converted to a Blob: 42', e.getMessage());
 		}
 	}
@@ -259,7 +301,8 @@ private class JSONParseTests {
 			parser = new JSONParse('[1,2,3]');
 			parser.getDatetimeValue();
 			System.assert(false, 'Node is not a valid Datetime, should have seen an exception about that.');
-		}catch(JSONParse.InvalidConversionException e) {
+		}
+		catch(JSONParse.InvalidConversionException e) {
 			System.assertEquals('Only Long and String values can be converted to a Datetime: [ 1, 2, 3 ]', e.getMessage());
 		}
 	}
@@ -276,7 +319,8 @@ private class JSONParseTests {
 			parser = new JSONParse('[1,2,3]');
 			parser.getDateValue();
 			System.assert(false, 'Node is not a valid Date, should have seen an exception about that.');
-		}catch(JSONParse.InvalidConversionException e) {
+		}
+		catch(JSONParse.InvalidConversionException e) {
 			System.assertEquals('Only Long and String values can be converted to a Date: [ 1, 2, 3 ]', e.getMessage());
 		}
 	}
@@ -299,7 +343,8 @@ private class JSONParseTests {
 			parser = new JSONParse('[1,2,3]');
 			parser.getDecimalValue();
 			System.assert(false, 'Node is not a valid Decimal, should have seen an exception about that.');
-		}catch(JSONParse.InvalidConversionException e) {
+		}
+		catch(JSONParse.InvalidConversionException e) {
 			System.assertEquals('This value cannot be converted to a Decimal: [ 1, 2, 3 ]', e.getMessage());
 		}
 	}
@@ -322,14 +367,15 @@ private class JSONParseTests {
 			parser = new JSONParse('[1,2,3]');
 			parser.getDoubleValue();
 			System.assert(false, 'Node is not a valid Double, should have seen an exception about that.');
-		}catch(JSONParse.InvalidConversionException e) {
+		}
+		catch(JSONParse.InvalidConversionException e) {
 			System.assertEquals('This value cannot be converted to a Double: [ 1, 2, 3 ]', e.getMessage());
 		}
 	}
 
 	@IsTest static void testGetIdValue() {
 
-		Account a = new Account(Name='Acme');
+		Account a = new Account(Name = 'Acme');
 		insert a;
 
 		JSONParse parser = new JSONParse('"' + String.valueOf(a.Id) + '"');
@@ -339,7 +385,8 @@ private class JSONParseTests {
 			parser = new JSONParse('[1,2,3]');
 			parser.getIdValue();
 			System.assert(false, 'Node is not a valid Id, should have seen an exception about that.');
-		}catch(JSONParse.InvalidConversionException e) {
+		}
+		catch(JSONParse.InvalidConversionException e) {
 			System.assertEquals('This value cannot be converted to an Id: [ 1, 2, 3 ]', e.getMessage());
 		}
 	}
@@ -362,7 +409,8 @@ private class JSONParseTests {
 			parser = new JSONParse('[1,2,3]');
 			parser.getIntegerValue();
 			System.assert(false, 'Node is not a valid Integer, should have seen an exception about that.');
-		}catch(JSONParse.InvalidConversionException e) {
+		}
+		catch(JSONParse.InvalidConversionException e) {
 			System.assertEquals('This value cannot be converted to an Integer: [ 1, 2, 3 ]', e.getMessage());
 		}
 	}
@@ -385,7 +433,8 @@ private class JSONParseTests {
 			parser = new JSONParse('[1,2,3]');
 			parser.getLongValue();
 			System.assert(false, 'Node is not a valid Long, should have seen an exception about that.');
-		}catch(JSONParse.InvalidConversionException e) {
+		}
+		catch(JSONParse.InvalidConversionException e) {
 			System.assertEquals('This value cannot be converted to a Long: [ 1, 2, 3 ]', e.getMessage());
 		}
 	}
@@ -408,7 +457,8 @@ private class JSONParseTests {
 			parser = new JSONParse('{}');
 			parser.getStringValue();
 			System.assert(false, 'Node is not a valid String, should have seen an exception about that.');
-		}catch(JSONParse.InvalidConversionException e) {
+		}
+		catch(JSONParse.InvalidConversionException e) {
 			System.assertEquals('Objects and arrays are not Strings: { }', e.getMessage());
 		}
 
@@ -416,7 +466,8 @@ private class JSONParseTests {
 			parser = new JSONParse('[]');
 			parser.getStringValue();
 			System.assert(false, 'Node is not a valid String, should have seen an exception about that.');
-		}catch(JSONParse.InvalidConversionException e) {
+		}
+		catch(JSONParse.InvalidConversionException e) {
 			System.assertEquals('Objects and arrays are not Strings: [ ]', e.getMessage());
 		}
 	}
@@ -433,7 +484,8 @@ private class JSONParseTests {
 			parser = new JSONParse('[1,2,3]');
 			parser.getTimeValue();
 			System.assert(false, 'Node is not a valid Time, should have seen an exception about that.');
-		}catch(JSONParse.InvalidConversionException e) {
+		}
+		catch(JSONParse.InvalidConversionException e) {
 			System.assertEquals('Only Long and String values can be converted to a Time: [ 1, 2, 3 ]', e.getMessage());
 		}
 	}
