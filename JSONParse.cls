@@ -26,7 +26,7 @@ SOFTWARE.
  *
  * @see https://github.com/open-force/jsonparse
  */
-global with sharing class JSONParse {
+public with sharing class JSONParse {
 
 	private static final Pattern ARRAY_NOTATION = Pattern.compile('\\[(\\d+)]');
 
@@ -40,7 +40,7 @@ global with sharing class JSONParse {
 	 *
 	 * @param jsonData JSON data to parse
 	 */
-	global JSONParse(String jsonData) {
+	public JSONParse(String jsonData) {
 		value = JSON.deserializeUntyped(jsonData);
 	}
 
@@ -69,7 +69,7 @@ global with sharing class JSONParse {
 	 * @throws MissingKeyException if part of the path can't be resolved because there is no match on that key
 	 * @throws ListException if part of the path can't be resolved because an array index is used that is out of bounds
 	 */
-	global JSONParse get(String path) {
+	public JSONParse get(String path) {
 
 		JSONParse currentNode = this; // we start with ourselves and drill deeper
 
@@ -106,7 +106,7 @@ global with sharing class JSONParse {
 	 *
 	 * @return True if the property exists, or false if the property or any part of the path didn't exist.
 	 */
-	global Boolean exists(String path) {
+	public Boolean exists(String path) {
 
 		JSONParse currentNode = this; // we start with ourselves and drill deeper
 
@@ -148,7 +148,7 @@ global with sharing class JSONParse {
 	 * @return A Map of JSONParse instances
 	 * @throws NotAnObjectException if the internal wrapped value is not a JSON object
 	 */
-	global Map<String, JSONParse> asMap() {
+	public Map<String, JSONParse> asMap() {
 		if(!isObject()) {
 			throw new NotAnObjectException('The wrapped value is not a JSON object:\n' + toStringPretty());
 		}
@@ -169,7 +169,7 @@ global with sharing class JSONParse {
 	 * @return A List of JSONParse instances, each wrapping one of the List items
 	 * @throws NotAnArrayException if the internal wrapped value is not a List instance
 	 */
-	global List<JSONParse> asList() {
+	public List<JSONParse> asList() {
 		if(!isArray()) {
 			throw new NotAnArrayException('The wrapped value is not a JSON array:\n' + toStringPretty());
 		}
@@ -186,15 +186,15 @@ global with sharing class JSONParse {
 	// ------ Utility ------------------------
 	// ---------------------------------------
 
-	global Boolean isObject() {
+	public Boolean isObject() {
 		return value instanceof Map<String, Object>;
 	}
 
-	global Boolean isArray() {
+	public Boolean isArray() {
 		return value instanceof List<Object>;
 	}
 
-	global String toStringPretty() {
+	public String toStringPretty() {
 		return JSON.serializePretty(value);
 	}
 
@@ -202,21 +202,21 @@ global with sharing class JSONParse {
 	// ------ Value Extraction ---------------
 	// ---------------------------------------
 
-	global Blob getBlobValue() {
+	public Blob getBlobValue() {
 		if(value instanceof String) {
 			return EncodingUtil.base64Decode((String)value);
 		}
 		throw new InvalidConversionException('Only String values can be converted to a Blob: ' + toStringPretty());
 	}
 
-	global Boolean getBooleanValue() {
+	public Boolean getBooleanValue() {
 		if(value instanceof Boolean) {
 			return (Boolean)value;
 		}
 		return Boolean.valueOf(value);
 	}
 
-	global Datetime getDatetimeValue() {
+	public Datetime getDatetimeValue() {
 		if(value instanceof Long) {
 			return Datetime.newInstance((Long)value);
 		}
@@ -226,7 +226,7 @@ global with sharing class JSONParse {
 		throw new InvalidConversionException('Only Long and String values can be converted to a Datetime: ' + toStringPretty());
 	}
 
-	global Date getDateValue() {
+	public Date getDateValue() {
 		if(value instanceof Long) {
 			return Datetime.newInstance((Long)value).dateGmt();
 		}
@@ -236,7 +236,7 @@ global with sharing class JSONParse {
 		throw new InvalidConversionException('Only Long and String values can be converted to a Date: ' + toStringPretty());
 	}
 
-	global Decimal getDecimalValue() {
+	public Decimal getDecimalValue() {
 		if(value instanceof Decimal) {
 			return (Decimal)value;
 		}
@@ -246,7 +246,7 @@ global with sharing class JSONParse {
 		throw new InvalidConversionException('This value cannot be converted to a Decimal: ' + toStringPretty());
 	}
 
-	global Double getDoubleValue() {
+	public Double getDoubleValue() {
 		if(value instanceof Double) {
 			return (Double)value;
 		}
@@ -256,14 +256,14 @@ global with sharing class JSONParse {
 		throw new InvalidConversionException('This value cannot be converted to a Double: ' + toStringPretty());
 	}
 
-	global Id getIdValue() {
+	public Id getIdValue() {
 		if(value instanceof String) {
 			return Id.valueOf((String)value);
 		}
 		throw new InvalidConversionException('This value cannot be converted to an Id: ' + toStringPretty());
 	}
 
-	global Integer getIntegerValue() {
+	public Integer getIntegerValue() {
 		if(value instanceof Integer) {
 			return (Integer)value;
 		}
@@ -276,7 +276,7 @@ global with sharing class JSONParse {
 		throw new InvalidConversionException('This value cannot be converted to an Integer: ' + toStringPretty());
 	}
 
-	global Long getLongValue() {
+	public Long getLongValue() {
 		if(value instanceof Long) {
 			return (Long)value;
 		}
@@ -289,7 +289,7 @@ global with sharing class JSONParse {
 		throw new InvalidConversionException('This value cannot be converted to a Long: ' + toStringPretty());
 	}
 
-	global String getStringValue() {
+	public String getStringValue() {
 		if(isObject() || isArray()) {
 			throw new InvalidConversionException('Objects and arrays are not Strings: ' + toStringPretty());
 		}
@@ -299,7 +299,7 @@ global with sharing class JSONParse {
 		return String.valueOf(value);
 	}
 
-	global Time getTimeValue() {
+	public Time getTimeValue() {
 		if(value instanceof Long) {
 			return Datetime.newInstance((Long)value).timeGmt();
 		}
@@ -309,15 +309,15 @@ global with sharing class JSONParse {
 		throw new InvalidConversionException('Only Long and String values can be converted to a Time: ' + toStringPretty());
 	}
 
-	global Object getValue() {
+	public Object getValue() {
 		return value;
 	}
 
 	// ---------------------------------------
 	// ------ Exceptions ---------------------
 	// ---------------------------------------
-	global class NotAnObjectException extends Exception {}
-	global class NotAnArrayException extends Exception {}
-	global class MissingKeyException extends Exception {}
-	global class InvalidConversionException extends Exception {}
+	public class NotAnObjectException extends Exception {}
+	public class NotAnArrayException extends Exception {}
+	public class MissingKeyException extends Exception {}
+	public class InvalidConversionException extends Exception {}
 }
