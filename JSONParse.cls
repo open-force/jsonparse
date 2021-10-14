@@ -30,6 +30,8 @@ public with sharing class JSONParse {
 
 	private static final Pattern ARRAY_NOTATION = Pattern.compile('\\[(\\d+)]');
 
+	public static String SEPARATOR = '\\.';
+
 	/**
 	 * Every JSONParse instance is a wrapper around some actual data, which we store here.
 	 */
@@ -74,7 +76,7 @@ public with sharing class JSONParse {
 		JSONParse currentNode = this; // we start with ourselves and drill deeper
 
 		// drill down through the nested structure
-		for(String key : path.split('\\.')) {
+		for(String key : path.split(SEPARATOR)) {
 
 			// check to see if we are going to parse this key as a reference to an array item
 			Matcher arrayMatcher = ARRAY_NOTATION.matcher(key);

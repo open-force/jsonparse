@@ -173,6 +173,15 @@ root.get('menu.popup.menuitem[0]');
 root.get('menu.popup.menuitem.[0]');
 ```
 
+### Custom Separator Character Sequence ###
+
+If for some reason a dot does not work as a separator for you (perhaps you have property names with dots in them), you can override the separator character at runtime.
+
+```apex
+JSONParse.SEPARATOR = ';';
+root.get('menu;popup');
+```
+
 ## Working with Collections ##
 
 If you'd like to work with your collection nodes (object = Map, array = List), there are two methods on JSONParse:
