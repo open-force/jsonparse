@@ -125,7 +125,7 @@ public with sharing class JSONParse {
 		JSONParse currentNode = this; // we start with ourselves and drill deeper
 
 		// drill down through the nested structure
-		for(String key : path.split('\\.')) {
+		for(String key : path.split(SEPARATOR)) {
 
 			// check to see if we are going to parse this key as a reference to an array item
 			Matcher arrayMatcher = ARRAY_NOTATION.matcher(key);
