@@ -107,6 +107,18 @@ public with sharing class JSONParse {
 	 * @return True if the property exists, or false if the property or any part of the path didn't exist.
 	 */
 	public Boolean exists(String path) {
+		return exists(path, false);
+	}
+
+	/**
+	 * Test a get() path to see if that final property exists or not.
+	 *
+	 * @param path Specially-formatted string that describes where to find a data value
+	 * @param notNull If true, this check will also assert the resulting value is not null
+	 *
+	 * @return True if the property exists, or false if the property or any part of the path didn't exist.
+	 */
+	public Boolean exists(String path, Boolean notNull) {
 
 		JSONParse currentNode = this; // we start with ourselves and drill deeper
 
@@ -137,6 +149,10 @@ public with sharing class JSONParse {
 
 				currentNode = wrappedMap.get(key);
 			}
+		}
+
+		if(notNull == true) {
+			return currentNode.getValue() != null;
 		}
 
 		return true; // found a node
