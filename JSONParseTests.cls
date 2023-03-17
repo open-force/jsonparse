@@ -6,7 +6,7 @@ private class JSONParseTests {
 
 	// Some JSON samples from https://json.org/example.html
 	public static final String SAMPLE1 = '{"menu":{"id":"file","value":"File","popup":{"menuitem":[{"value":"New","onclick":"CreateNewDoc()"},{"value":"Open","onclick":"OpenDoc()"},{"value":"Close","onclick":"CloseDoc()"}]}}}';
-	public static final String SAMPLE2 = '{"widget":{"debug":"on","window":{"title":"SampleKonfabulatorWidget","name":"main_window","width":500,"height":500},"image":{"src":"Images/Sun.png","name":"sun1","hOffset":250,"vOffset":250,"alignment":"center"},"text":{"data":"ClickHere","size":36,"style":"bold","name":"text1","hOffset":250,"vOffset":100,"alignment":"center","onMouseUp":"sun1.opacity=(sun1.opacity/100)*90;"}}}';
+	public static final String SAMPLE2 = '{"otherProp":null,"widget":{"debug":"on","window":{"title":"SampleKonfabulatorWidget","name":"main_window","width":500,"height":500},"image":{"src":"Images/Sun.png","name":"sun1","hOffset":250,"vOffset":250,"alignment":"center"},"text":{"data":"ClickHere","size":36,"style":"bold","name":"text1","hOffset":250,"vOffset":100,"alignment":"center","onMouseUp":"sun1.opacity=(sun1.opacity/100)*90;"}}}';
 	public static final String SAMPLE3 = '[{"servlet-name":"cofaxCDS","servlet-class":"org.cofax.cds.CDSServlet","init-param":{"configGlossary:installationAt":"Philadelphia,PA","configGlossary:adminEmail":"ksm@pobox.com","configGlossary:poweredBy":"Cofax","configGlossary:poweredByIcon":"/images/cofax.gif","configGlossary:staticPath":"/content/static","templateProcessorClass":"org.cofax.WysiwygTemplate","templateLoaderClass":"org.cofax.FilesTemplateLoader","templatePath":"templates","templateOverridePath":"","defaultListTemplate":"listTemplate.htm","defaultFileTemplate":"articleTemplate.htm","useJSP":false,"jspListTemplate":"listTemplate.jsp","jspFileTemplate":"articleTemplate.jsp","cachePackageTagsTrack":200,"cachePackageTagsStore":200,"cachePackageTagsRefresh":60,"cacheTemplatesTrack":100,"cacheTemplatesStore":50,"cacheTemplatesRefresh":15,"cachePagesTrack":200,"cachePagesStore":100,"cachePagesRefresh":10,"cachePagesDirtyRead":10,"searchEngineListTemplate":"forSearchEnginesList.htm","searchEngineFileTemplate":"forSearchEngines.htm","searchEngineRobotsDb":"WEB-INF/robots.db","useDataStore":true,"dataStoreClass":"org.cofax.SqlDataStore","redirectionClass":"org.cofax.SqlRedirection","dataStoreName":"cofax","dataStoreDriver":"com.microsoft.jdbc.sqlserver.SQLServerDriver","dataStoreUrl":"jdbc:microsoft:sqlserver://LOCALHOST:1433;DatabaseName=goon","dataStoreUser":"sa","dataStorePassword":"dataStoreTestQuery","dataStoreTestQuery":"SETNOCOUNTON;selecttest=\'test\';","dataStoreLogFile":"/usr/local/tomcat/logs/datastore.log","dataStoreInitConns":10,"dataStoreMaxConns":100,"dataStoreConnUsageLimit":100,"dataStoreLogLevel":"debug","maxUrlLength":500}},{"servlet-name":"cofaxEmail","servlet-class":"org.cofax.cds.EmailServlet","init-param":{"mailHost":"mail1","mailHostOverride":"mail2"}},{"servlet-name":"cofaxAdmin","servlet-class":"org.cofax.cds.AdminServlet"},{"servlet-name":"fileServlet","servlet-class":"org.cofax.cds.FileServlet"},{"servlet-name":"cofaxTools","servlet-class":"org.cofax.cms.CofaxToolsServlet","init-param":{"templatePath":"toolstemplates/","log":1,"logLocation":"/usr/local/tomcat/logs/CofaxTools.log","logMaxSize":"","dataLog":1,"dataLogLocation":"/usr/local/tomcat/logs/dataLog.log","dataLogMaxSize":"","removePageCache":"/content/admin/remove?cache=pages&id=","removeTemplateCache":"/content/admin/remove?cache=templates&id=","fileTransferFolder":"/usr/local/tomcat/webapps/content/fileTransferFolder","lookInContext":1,"adminGroupID":4,"betaServer":true}}]';
 
 	@IsTest static void testRawString() {
@@ -146,7 +146,7 @@ private class JSONParseTests {
 			System.assert(false, 'Our key was invalid, should have seen an exception about that.');
 		}
 		catch(JSONParse.MissingKeyException e) {
-			System.assertEquals('No match found for <badKey>: {widget}', e.getMessage());
+			System.assertEquals('No match found for <badKey>: {otherProp, widget}', e.getMessage());
 		}
 	}
 
@@ -235,6 +235,45 @@ private class JSONParseTests {
 		JSONParse parser = new JSONParse(SAMPLE3);
 
 		System.assertEquals(false, parser.exists('[7]'));
+	}
+
+	@IsTest static void testExistsNullOk() {
+
+		JSONParse parser = new JSONParse(SAMPLE2);
+
+		System.assertEquals(true, parser.exists('otherProp', false));
+	}
+
+	@IsTest static void testExistsNotNull() {
+
+		JSONParse parser = new JSONParse(SAMPLE2);
+
+		System.assertEquals(false, parser.exists('otherProp', true));
+	}
+
+	@IsTest static void testExistsArrayFirstItem() {
+
+		JSONParse parser = new JSONParse(SAMPLE3);
+
+		// this has always worked
+		System.assertEquals(true, parser.exists('[1]'));
+		System.assertEquals(false, parser.exists('[7]'));
+
+		// this works after a bug fix to how exists tests array elements
+		System.assertEquals(true, parser.exists('[0]'));
+	}
+
+	@IsTest static void testExistsArrayFirstItemNestedElement() {
+
+		JSONParse parser = new JSONParse(SAMPLE1);
+
+		// this has always worked
+		System.assertEquals(true, parser.exists('menu.popup.menuitem.[1].onclick'));
+		System.assertEquals(false, parser.exists('menu.popup.menuitem.[1].notpresent'));
+		System.assertEquals(false, parser.exists('menu.popup.menuitem.[7].onclick'));
+
+		// this works after a bug fix to how exists tests array elements
+		System.assertEquals(true, parser.exists('menu.popup.menuitem.[0].onclick'));
 	}
 
 	@IsTest static void testGetBlobValue() {

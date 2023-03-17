@@ -134,7 +134,7 @@ public with sharing class JSONParse {
 
 				Integer index = Integer.valueOf(arrayMatcher.group(1));
 				List<JSONParse> nodeAsList = currentNode.asList();
-				if(0 < index && index < nodeAsList.size()) {
+				if(0 <= index && index < nodeAsList.size()) {
 					currentNode = currentNode.asList().get(index);
 				}
 				else {
