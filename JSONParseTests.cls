@@ -328,13 +328,17 @@ private class JSONParseTests {
 		System.assertEquals(true, parser.getBooleanValue());
 	}
 
+	// The expected values are strings because Date.newInstance and
+	// Datetime.newInstanceGmt read the year in the running user's calendar: for
+	// a th_TH user, Date.newInstance(2011, 3, 22) is 1468-03-22, while a value
+	// parsed from an ISO string keeps the year as written.
 	@IsTest static void testGetDatetimeValue() {
 
 		JSONParse parser = new JSONParse('"2011-03-22T13:01:23"');
-		System.assertEquals(Datetime.newInstanceGmt(2011, 3, 22, 13, 1, 23), parser.getDatetimeValue());
+		System.assertEquals('2011-03-22 13:01:23', String.valueOfGmt(parser.getDatetimeValue()));
 
 		parser = new JSONParse('1538783039073');
-		System.assertEquals(Datetime.newInstanceGmt(2018, 10, 05, 23, 43, 59), parser.getDatetimeValue());
+		System.assertEquals('2018-10-05 23:43:59', String.valueOfGmt(parser.getDatetimeValue()));
 
 		try {
 			parser = new JSONParse('[1,2,3]');
@@ -349,10 +353,10 @@ private class JSONParseTests {
 	@IsTest static void testGetDateValue() {
 
 		JSONParse parser = new JSONParse('"2011-03-22"');
-		System.assertEquals(Date.newInstance(2011, 3, 22), parser.getDateValue());
+		System.assertEquals('2011-03-22', String.valueOf(parser.getDateValue()));
 
 		parser = new JSONParse('1538783039073');
-		System.assertEquals(Date.newInstance(2018, 10, 05), parser.getDateValue());
+		System.assertEquals('2018-10-05', String.valueOf(parser.getDateValue()));
 
 		try {
 			parser = new JSONParse('[1,2,3]');
